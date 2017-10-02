@@ -1,7 +1,0 @@
-post_install() {
-  /bin/true
-}
-
-post_upgrade() {
-  /bin/true
-}
