@@ -1,0 +1,45 @@
+pkgname=oxy-git
+pkgdesc='Oxy, a secure remote access tool'
+license=('zlib')
+url='https://github.com/RiskSense-Ops/oxy/'
+pkgver=0.1.0
+pkgver() {
+  echo "0.1.0"
+}
+pkgrel=1
+arch=('x86_64')
+depends=()
+makedepends=()
+conflicts=()
+source=(
+  'git+https://github.com/RiskSense-Ops/oxy.git'
+)
+md5sums=('SKIP')
+install=oxy.install
+
+build() {
+  cd oxy
+  cargo build
+  cd ..
+}
+
+package() {
+  mkdir -p "$pkgdir/usr/bin/"
+  mkdir -p "$pkgdir/usr/lib/systemd/system"
+  cp -r "$srcdir/oxy/target/debug/oxy" "$pkgdir/usr/bin/"
+  cat >"$pkgdir/usr/lib/systemd/system/oxy.service" <<EOF
+[Unit]
+Description=Oxy Daemon
+After=network.target
+
+[Service]
+Environment=RUST_BACKTRACE=1
+ExecStart=/usr/bin/oxy --server
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
